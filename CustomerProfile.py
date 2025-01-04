@@ -131,21 +131,44 @@ def C_Jobs(csv_folder, working_folder, output_jobs):
     print(f"Jobs analysis saved to {output_xlsx}")
     return df_master
 
-def C1_classify_jobs(comment):
-    """
-    Analyze if a comment describes a task to be done, a problem to be solved,
-    or a need to be satisfied (Jobs in Value Proposition Design).
-
-    Args:
-        comment (str): The comment text to analyze.
-
-    Returns:
-        str: 'Job' if the comment matches the criteria, otherwise an empty string.
-    """
-    keywords = ['task', 'problem', 'solve', 'need', 'requirement', 'goal', 'objective']
-    if any(keyword in comment.lower() for keyword in keywords):
-        return 'Job'
-    return ''
+def C_Jobs(csv_folder, filename):
+    # List all CSV files in the folder
+    csv_files = [f for f in os.listdir(csv_folder) if f.endswith('.csv')]
+    
+    if not csv_files:
+        print("No CSV files found in the folder.")
+        return None
+    
+    # Initialize the dataframe with the first file
+    first_file = csv_files[0]
+    dataframe = pd.read_csv(os.path.join(csv_folder, first_file))
+    all_headers = dataframe.columns.tolist()
+    
+    # Iterate through the rest of the CSV files
+    for csv_file in csv_files[1:]:
+        file_path = os.path.join(csv_folder, csv_file)
+        temp_df = pd.read_csv(file_path)
+        
+        # Check headers
+        if temp_df.columns.tolist() != all_headers:
+            print(f"Warning: Headers in {csv_file} do not match {first_file}. Exiting.")
+            return None
+        
+        # Append to the dataframe without headers
+        dataframe = pd.concat([dataframe, temp_df], ignore_index=True)
+    
+    # Add new columns
+    dataframe['Job_Class'] = ''
+    dataframe['Job_Types'] = ''
+    
+    # Save the dataframe
+    output_path = os.path.join(csv_folder, f"{filename}_workingdata.csv")
+    dataframe.to_csv(output_path, index=False)
+    
+    # Print the first few rows of the dataframe
+    print(dataframe.head())
+    
+    return dataframe
 
 
 def main():
@@ -153,37 +176,40 @@ def main():
     working_folder = r'/home/armjorge/Documents'
     # Define the file name
     input_xlsx = os.path.join(working_folder, 'CustomerProfileVideos.xlsx')
+    output_csv = 'OutputCSV1'
+    user_input = input("¿Qué deseas hacer?\n1. Extraer comentarios de la lista de archivos {input_xlsx} \n2. Fusionar archivos CSV\nIngrese el número de la opción: ")
     
-    # Generate the links dictionary
-    links_dictionary = A_generateDictionary(input_xlsx)
-    
-    # Print the resulting dictionary
-    print("Generated Links Dictionary:")
-    print(links_dictionary)
-        # Define the service account JSON key file path
-    SERVICE_ACCOUNT_FILE = os.path.join(working_folder, 'armjorge.json')
+    if user_input == "1":    
+        # Generate the links dictionary
+        links_dictionary = A_generateDictionary(input_xlsx)
+        
+        # Print the resulting dictionary
+        print("Generated Links Dictionary:")
+        print(links_dictionary)
+            # Define the service account JSON key file path
+        SERVICE_ACCOUNT_FILE = os.path.join(working_folder, 'armjorge.json')
 
-    # Authenticate and build the YouTube API client
-    SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
-    try:
-        credentials = service_account.Credentials.from_service_account_file(
-            SERVICE_ACCOUNT_FILE, scopes=SCOPES
-        )
-        youtube = build("youtube", "v3", credentials=credentials)
-    except FileNotFoundError:
-        print(f"Service account file not found at {SERVICE_ACCOUNT_FILE}")
-    except google.auth.exceptions.MalformedError as e:
-        print(f"Malformed service account file: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-    
-    B_extractcomments(links_dictionary, working_folder, 'OutputCSV1', youtube)
+        # Authenticate and build the YouTube API client
+        SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
+        try:
+            credentials = service_account.Credentials.from_service_account_file(
+                SERVICE_ACCOUNT_FILE, scopes=SCOPES
+            )
+            youtube = build("youtube", "v3", credentials=credentials)
+        except FileNotFoundError:
+            print(f"Service account file not found at {SERVICE_ACCOUNT_FILE}")
+        except google.auth.exceptions.MalformedError as e:
+            print(f"Malformed service account file: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+        
+        B_extractcomments(links_dictionary, working_folder, 'OutputCSV1', youtube)
 
-    csv_folder = os.path.join(working_folder, 'OutputCSV1')
-    output_jobs = 'Jobs.xlsx'
-
+    csv_folder = os.path.join(working_folder, output_csv)
+    outputfilename = 'PenClip'
     # Run the jobs extraction
-    df_jobs = C_Jobs(csv_folder, working_folder, output_jobs)
+    df_jobs = C_Jobs(csv_folder, outputfilename)
+    print("*******\nFinalizamos con éxito la script\n")
         
 if __name__ == "__main__":
  main()
