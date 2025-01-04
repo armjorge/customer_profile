@@ -95,43 +95,7 @@ def B1_get_comments(video_id, youtube, max_results=10000):
 
     return pd.DataFrame(comments)
 
-def C_Jobs(csv_folder, working_folder, output_jobs):
-    """
-    Process CSV files to extract comments classified as 'Jobs'.
-
-    Args:
-        csv_folder (str): Path to the folder containing CSV files.
-        working_folder (str): Path to the working directory.
-        output_jobs (str): Name of the output Excel file.
-
-    Returns:
-        DataFrame: Master DataFrame containing classified comments.
-    """
-    output_xlsx = os.path.join(working_folder, output_jobs)
-    df_master = pd.DataFrame()  # Initialize an empty master DataFrame
-
-    # Iterate through all CSV files in the folder
-    for csv_file in os.listdir(csv_folder):
-        if csv_file.endswith('.csv'):
-            file_path = os.path.join(csv_folder, csv_file)
-            input_df = pd.read_csv(file_path)
-
-            # Classify comments
-            input_df['Job'] = input_df['Comment'].apply(C1_classify_jobs)
-            
-            # Filter rows with 'Job'
-            classified_df = input_df[input_df['Job'] == 'Job'].copy()
-            classified_df['filename'] = csv_file  # Add filename column
-            
-            # Append to master DataFrame
-            df_master = pd.concat([df_master, classified_df], ignore_index=True)
-
-    # Save the master DataFrame to Excel
-    df_master.to_excel(output_xlsx, index=False)
-    print(f"Jobs analysis saved to {output_xlsx}")
-    return df_master
-
-def C_Jobs(csv_folder, filename):
+def C_Commondataframe(csv_folder, filename):
     # List all CSV files in the folder
     csv_files = [f for f in os.listdir(csv_folder) if f.endswith('.csv')]
     
@@ -170,15 +134,22 @@ def C_Jobs(csv_folder, filename):
     
     return dataframe
 
+def D_Jobs(csv_folder):
+    print(f"underdevelop\n{csv_folder}\n")
 
 def main():
     # Define working folder
     working_folder = r'/home/armjorge/Documents'
-    # Define the file name
+    # Define the file name and paths
     input_xlsx = os.path.join(working_folder, 'CustomerProfileVideos.xlsx')
     output_csv = 'OutputCSV1'
-    user_input = input("¿Qué deseas hacer?\n1. Extraer comentarios de la lista de archivos {input_xlsx} \n2. Fusionar archivos CSV\nIngrese el número de la opción: ")
-    
+    csv_folder = os.path.join(working_folder, output_csv)
+    outputfilename = 'PenClip'
+    #Ask the user    
+    print("¿Qué deseas hacer?\n1. Extraer comentarios de la lista de archivos {input_xlsx}")
+    print("2. Fusionar archivos CSV y generar un dataframe\n3. Procesar el CSV  \n")
+
+    user_input = input("Ingrese el número de la opción: ")
     if user_input == "1":    
         # Generate the links dictionary
         links_dictionary = A_generateDictionary(input_xlsx)
@@ -204,11 +175,12 @@ def main():
             print(f"An unexpected error occurred: {e}")
         
         B_extractcomments(links_dictionary, working_folder, 'OutputCSV1', youtube)
+    if user_input == "2":    
+        # Run the jobs extraction
+        df_input = C_Commondataframe(csv_folder, outputfilename)
+    if user_input == "3":  
+        D_Jobs(csv_folder)
 
-    csv_folder = os.path.join(working_folder, output_csv)
-    outputfilename = 'PenClip'
-    # Run the jobs extraction
-    df_jobs = C_Jobs(csv_folder, outputfilename)
     print("*******\nFinalizamos con éxito la script\n")
         
 if __name__ == "__main__":
