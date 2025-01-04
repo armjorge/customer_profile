@@ -150,9 +150,9 @@ def C1_classify_jobs(comment):
 
 def main():
     # Define working folder
-    working_folder = r'G:\My Drive\Projects\Pen Clip'
+    working_folder = r'/home/armjorge/Documents'
     # Define the file name
-    input_xlsx = os.path.join(working_folder, 'Key_videos.xlsx')
+    input_xlsx = os.path.join(working_folder, 'CustomerProfileVideos.xlsx')
     
     # Generate the links dictionary
     links_dictionary = A_generateDictionary(input_xlsx)
