@@ -1,1 +1,12 @@
-venv/
+# Ignore Python virtual environments
+customer_profile/
+
+# Or more specifically:
+customer_profile/lib/
+customer_profile/bin/
+customer_profile/pyvenv.cfg
+customer_profile/include/
+
+# If you ever move your venv elsewhere, exclude all venvs:
+*.venv
+*.virtualenv

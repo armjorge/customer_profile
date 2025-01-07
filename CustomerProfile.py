@@ -139,9 +139,10 @@ def D_Jobs(csv_folder):
 
 def main():
     # Define working folder
-    working_folder = r'/home/armjorge/Documents'
+    script_directory = os.path.dirname(os.path.abspath(__file__))
+    working_folder = os.path.abspath(os.path.join(script_directory, '..'))
     # Define the file name and paths
-    input_xlsx = os.path.join(working_folder, 'CustomerProfileVideos.xlsx')
+    input_xlsx = os.path.join(working_folder, 'Key_videos.xlsx')
     output_csv = 'OutputCSV1'
     csv_folder = os.path.join(working_folder, output_csv)
     outputfilename = 'PenClip'
