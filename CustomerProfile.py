@@ -2,6 +2,7 @@ import os
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 import pandas as pd
+import re
 
 def A_generateDictionary(xlsx_file):
     """
@@ -95,7 +96,7 @@ def B1_get_comments(video_id, youtube, max_results=10000):
 
     return pd.DataFrame(comments)
 
-def C_Commondataframe(csv_folder, filename):
+def C_Commondataframe(csv_folder, filename, outputfolder):
     # List all CSV files in the folder
     csv_files = [f for f in os.listdir(csv_folder) if f.endswith('.csv')]
     
@@ -124,9 +125,16 @@ def C_Commondataframe(csv_folder, filename):
     # Add new columns
     dataframe['Job_Class'] = ''
     dataframe['Job_Types'] = ''
-    
+    dataframe['Job_Context'] = ''
+    def remove_empty_line_breaks(comment):
+        # Replace two or more line breaks with a single line break
+        return re.sub(r'\n\s*\n', '\n', comment)
+
+    # Apply the function to the 'Comment' column
+    dataframe['Comment'] = dataframe['Comment'].apply(remove_empty_line_breaks)
+
     # Save the dataframe
-    output_path = os.path.join(csv_folder, f"{filename}_workingdata.csv")
+    output_path = os.path.join(outputfolder, f"{filename}_workingdata.csv")
     dataframe.to_csv(output_path, index=False)
     
     # Print the first few rows of the dataframe
@@ -134,8 +142,23 @@ def C_Commondataframe(csv_folder, filename):
     
     return dataframe
 
-def D_Jobs(csv_folder):
-    print(f"underdevelop\n{csv_folder}\n")
+def D1_Job_Class(csv_folder):
+    print("\nA customer job could be:\n" )
+    print("- The tasks they are trying  to perform and complete")
+    print("the problems they  are trying to solve")
+    print("the needs they are trying  to satisfy.\n")
+    
+def D2_Job_type(csv_folder):
+    print("\nThe main types of  customer jobs to be done")
+    print("1. Functional jobs  When your customers try to perform or complete  a specific task or solve a specific problem")
+    print("2. Social jobs  When your customers want to look good or gain  power or status")
+    print("3. Personal/emotional jobs  When your customers seek a specific emotional  state, such as feeling good or secure")
+    print("\n...and supporting jobs:\n")
+    print("1. BUYER OF VALUE: jobs related to buying  value, such as comparing offers")
+    print("2. COCREATOR OF VALUE: jobs related to  cocreating value with your organization")
+    print("3. TRANSFERRER OF VALUE: jobs related to the  end of a value proposition’s life cycle\n3")
+def D3_Job_context(csv_folder):
+    print("Job context To be developped")
 
 def main():
     # Define working folder
@@ -178,9 +201,10 @@ def main():
         B_extractcomments(links_dictionary, working_folder, 'OutputCSV1', youtube)
     if user_input == "2":    
         # Run the jobs extraction
-        df_input = C_Commondataframe(csv_folder, outputfilename)
+        df_input = C_Commondataframe(csv_folder, outputfilename, working_folder)
     if user_input == "3":  
-        D_Jobs(csv_folder)
+        D1_Job_Class(csv_folder)
+        D2_Job_type(csv_folder)
 
     print("*******\nFinalizamos con éxito la script\n")
         
