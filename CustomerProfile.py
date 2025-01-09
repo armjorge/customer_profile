@@ -63,6 +63,14 @@ def B_extractcomments(links_dictionary, working_folder, output_folder, youtube):
 def B1_get_comments(video_id, youtube, max_results=10000):
     # Function to extract comments from a single video
     comments = []
+
+    # Fetch the video title
+    video_request = youtube.videos().list(
+        part="snippet",
+        id=video_id
+    )
+    video_response = video_request.execute()
+    video_title = video_response['items'][0]['snippet']['title'] if video_response['items'] else "Unknown Title"    
     request = youtube.commentThreads().list(
         part="snippet",
         videoId=video_id,
@@ -79,7 +87,8 @@ def B1_get_comments(video_id, youtube, max_results=10000):
                 'Author': comment['authorDisplayName'],
                 'Comment': comment['textDisplay'],
                 'Likes': comment['likeCount'],
-                'PublishedAt': comment['publishedAt']
+                'PublishedAt': comment['publishedAt'],
+                'VideoTitle': video_title  # Add the video title to each row                
             })
 
         # Check if there's another page of comments
